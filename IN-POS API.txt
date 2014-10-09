@@ -1,0 +1,51 @@
+IN-POS
+
+1. Lấy access_token
+[POST]/oauth/token
+grant_type: password
+client_id: <clientId>
+client_secret: <clientSecret>
+username: <username>
+password: <password>
+
+2. Refresh token
+[POST]/oauth/token
+grant_type: refresh_token
+client_id: <clientId>
+client_secret: <clientSecret>
+refresh_token: <refresh_token>
+
+3. Lấy danh sách sản phẩm
+[GET] /product
+
+4. Tìm 1 sản phẩm
+[GET] /product/find?where={"name": {"contains": "Dương"}}
+
+5. Tìm 1 khách hàng
+[GET] /customer/find?where={"name": {"contains": "<searchString>"}}
+hoặc
+[GET] /customer/find?where={"phone": {"endsWith": "<searchString>"}}
+hoặc
+[GET] /customer/find?where={"or": [{"phone": {"endsWith": "<searchString>"}}, [{"name": {"contains": "<searchString>"}}]}
+
+6. Tra một mã coupon
+[GET] /coupon/findOne?where={"code": "<coupon_code>"}
+
+7. Thêm một hóa đơn
+[POST] /sale
+customer: <customerId>
+user: <userId>
+subtotal: float
+discount: float
+coupon: <couponId>
+totalItem: int
+total: float
+receipt: array of
+    + array of 3 elements: [<productId>, <quantity>, <price>]
+
+Default user already exists
+    - username: me@gmail.com
+    - password: password
+TrustedTestClient already exists
+    - client_id: W7BTP42QXQ
+    - client_secret: wzqLDAojAXVYqw8fWJLy2erqkmA4gB
