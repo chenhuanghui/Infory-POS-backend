@@ -25,7 +25,7 @@ module.exports = {
         toJSON: function() {
             var obj = this.toObject();
             // var host = sails.getBaseurl() + '/';
-            var host = 'http://192.168.1.104:1337/';
+            var host = 'http://n-pos.infory.vn/';
             obj.image = host + obj.image;
             return obj;
         }
