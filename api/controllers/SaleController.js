@@ -5,6 +5,9 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 
+// var flow = require('nimble');
+var step = require('step');
+
 module.exports = {
 	create: function(req, res){
 
@@ -65,6 +68,62 @@ module.exports = {
                 })
             }
         });
+    },
+
+    report: function(req, res){
+        var user = req.user;
+        var today = new Date();
+        today.setHours(0, 0, 0);
+        Sale.find({user: user.id, updatedAt: {'>': today}})
+            .exec(function(err, sales){
+                var subtotal = 0.0;
+                var discount = 0.0;
+                var total = 0.0;
+                var totalItem = 0;
+
+                step(
+                    function calculate(){
+                        var saleDetails = {};
+                        for(i=0; i<sales.length; i++){
+                            total += sales[i].total;
+                            subtotal += sales[i].subtotal;
+                            discount += sales[i].discount;
+                            totalItem += sales[i].totalItem;
+                            SaleItem.find({sale: sales[i].id})
+                                .populate('product')
+                                .exec(this);
+                        }
+                    },
+                    function calSaleDetails(err, saleItems){
+                        if(err)
+                            throw err;
+                        var saleDetails = {};
+                        for(j=0; j<saleItems.length; j++){
+                            if(saleItems[j].product === undefined)
+                                continue;
+                            if(saleDetails.hasOwnProperty(saleItems[j].product.name))
+                                saleDetails[saleItems[j].product.name]
+                                    += saleItems[j].quantity;
+                            else
+                                saleDetails[saleItems[j].product.name]
+                                    = saleItems[j].quantity;
+                        }
+                        return saleDetails;
+                    },
+                    function render(err, saleDetails){
+                        if(err)
+                            throw err;
+                        Material.find().exec(function(err, materials){
+                            var inventoryDetails = {};
+                            for(i=0; i<materials.length; i++){
+                                inventoryDetails[materials[i].name] = new Array(materials[i].instock, materials[i].unit);
+                            }
+                            res.status(201);
+                            res.ok({subtotal: subtotal, discount: discount, total: total, totalItem: totalItem, saleDetails: saleDetails, inventoryDetails: inventoryDetails});
+                        })
+                    }
+                )
+            });
     }
 };
 
